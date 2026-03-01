@@ -1,0 +1,121 @@
+universe:
+  # Banks
+  YESBANK.NS: "Yes Bank"
+  RBLBANK.NS: "RBL Bank"
+  IDFCFIRSTB.NS: "IDFC First Bank"
+  SBIN.NS: "SBI"
+  HDFCBANK.NS: "HDFC Bank"
+  # Telecom
+  IDEA.NS: "Vodafone Idea"
+  # Media
+  ZEEL.NS: "Zee Entertainment"
+  # NBFCs
+  MANAPPURAM.NS: "Manappuram Finance"
+  MUTHOOTFIN.NS: "Muthoot Finance"
+  CHOLAFIN.NS: "Chola Finance"
+  BAJFINANCE.NS: "Bajaj Finance"
+  # Aviation
+  INDIGO.NS: "IndiGo"
+  # Energy
+  SUZLON.NS: "Suzlon Energy"
+  JSWENERGY.NS: "JSW Energy"
+  # Conglomerate
+  ADANIENT.NS: "Adani Enterprises"
+  ADANIPORTS.NS: "Adani Ports"
+  # Metals
+  VEDL.NS: "Vedanta"
+  JINDALSTEL.NS: "JSPL"
+  TATASTEEL.NS: "Tata Steel"
+  SAIL.NS: "SAIL"
+  HINDCOPPER.NS: "Hindustan Copper"
+  # Electricals
+  POLYCAB.NS: "Polycab"
+  # Entertainment
+  PVRINOX.NS: "PVR Inox"
+  # Auto
+  LTF.NS: "LT Finance"
+  MARUTI.NS: "Maruti"
+  # Pharma
+  SUNPHARMA.NS: "Sun Pharma"
+  DRREDDY.NS: "Dr Reddy"
+  CIPLA.NS: "Cipla"
+  # IT
+  TCS.NS: "TCS"
+  TECHM.NS: "Tech Mahindra"
+  WIPRO.NS: "Wipro"
+  INFY.NS: "Infosys"
+  # Chemicals
+  TATACHEM.NS: "Tata Chemicals"
+  # Infrastructure
+  GMRAIRPORT.NS: "GMR Airports"
+  # Realty
+  DLF.NS: "DLF"
+
+sectors:
+  YESBANK.NS: "Bank"
+  RBLBANK.NS: "Bank"
+  IDFCFIRSTB.NS: "Bank"
+  SBIN.NS: "Bank"
+  HDFCBANK.NS: "Bank"
+  IDEA.NS: "Telecom"
+  ZEEL.NS: "Media"
+  MANAPPURAM.NS: "NBFC"
+  MUTHOOTFIN.NS: "NBFC"
+  CHOLAFIN.NS: "NBFC"
+  BAJFINANCE.NS: "NBFC"
+  INDIGO.NS: "Aviation"
+  SUZLON.NS: "Energy"
+  JSWENERGY.NS: "Energy"
+  ADANIENT.NS: "Conglomerate"
+  ADANIPORTS.NS: "Conglomerate"
+  VEDL.NS: "Metals"
+  JINDALSTEL.NS: "Metals"
+  TATASTEEL.NS: "Metals"
+  SAIL.NS: "Metals"
+  HINDCOPPER.NS: "Metals"
+  POLYCAB.NS: "Electricals"
+  PVRINOX.NS: "Entertainment"
+  LTF.NS: "NBFC"
+  MARUTI.NS: "Auto"
+  SUNPHARMA.NS: "Pharma"
+  DRREDDY.NS: "Pharma"
+  CIPLA.NS: "Pharma"
+  TCS.NS: "IT"
+  TECHM.NS: "IT"
+  WIPRO.NS: "IT"
+  INFY.NS: "IT"
+  TATACHEM.NS: "Chemicals"
+  GMRAIRPORT.NS: "Infrastructure"
+  DLF.NS: "Realty"
+
+stress_context:
+  YESBANK.NS: "RBI bailout, near collapse 2020"
+  RBLBANK.NS: "CEO sudden exit, RBI intervention 2021"
+  IDFCFIRSTB.NS: "Weak asset quality, transition stress"
+  IDEA.NS: "Existential debt crisis, AGR dues"
+  ZEEL.NS: "Promoter pledge, Sony merger collapse"
+  MANAPPURAM.NS: "RBI audit, gold loan regulatory risk"
+  SPICEJET.NS: "Near bankruptcy, DGCA grounding"
+  SUZLON.NS: "Massive debt restructuring history"
+  ADANIENT.NS: "Hindenburg short attack 2023"
+  ADANIPORTS.NS: "Hindenburg short attack 2023"
+  VEDL.NS: "High leverage, complex holding structure"
+  JINDALSTEL.NS: "Overleveraged, debt restructuring"
+  POLYCAB.NS: "IT raid, accounting allegations 2023"
+  PVRINOX.NS: "COVID collapse, merger stress"
+  TATAMOTORS.NS: "JLR debt, turnaround story"
+  SUNPHARMA.NS: "SEBI fraud case, promoter issues"
+  DRREDDY.NS: "USFDA import alerts"
+  TECHM.NS: "Margin stress, CEO change"
+  GMRAIRPORT.NS: "High debt, infra stress"
+  DLF.NS: "Debt overhang, real estate downturn"
+
+model:
+  lookback_years: 3
+  risk_free_rate: 0.068
+  trading_days: 252
+
+scoring_weights:
+  merton: 0.40
+  financials: 0.35
+  market: 0.25
