@@ -260,8 +260,123 @@ def write_financials(financial_results: pd.DataFrame):
     conn.close()
     print(f"[DB] Written {rows_written} financial score rows")
 
+def write_market(market_results: pd.DataFrame):
+    """
+    Write market signal scores to Postgres.
+    """
 
-def run_db_write(data: dict, merton_results=None):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS market_scores (
+                ticker VARCHAR(20),
+                run_date DATE,
+                momentum_3m FLOAT,
+                vol_regime FLOAT,
+                max_drawdown FLOAT,
+                momentum_score FLOAT,
+                vol_score FLOAT,
+                drawdown_score FLOAT,
+                market_stress_score FLOAT,
+                PRIMARY KEY (ticker, run_date)
+            );
+
+""")
+    
+    rows_written = 0
+    run_date = pd.Timestamp.today().date()
+
+    for ticker, row in market_results.iterrows():
+        cur.execute("""
+            INSERT INTO market_scores (
+                    ticker, run_date, momentum_3m, vol_regime, max_drawdown, momentum_score, vol_score, drawdown_score, market_stress_score
+                    )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (ticker, run_date) DO UPDATE SET
+                    momentum_3m = EXCLUDED.momentum_3m,
+                    vol_regime = EXCLUDED.vol_regime,
+                    max_drawdown = EXCLUDED.max_drawdown,
+                    momentum_score = EXCLUDED.momentum_score,
+                    vol_score = EXCLUDED.vol_score,
+                    drawdown_score = EXCLUDED.drawdown_score,
+                    market_stress_score = EXCLUDED.market_stress_score;
+
+        """, (
+            ticker, run_date,
+            float(row['momentum_3m']) if pd.notna(row['momentum_3m']) else None,
+            float(row["vol_regime"]) if pd.notna(row["vol_regime"]) else None,
+            float(row["max_drawdown"]) if pd.notna(row["max_drawdown"]) else None,
+            float(row["momentum_score"]) if pd.notna(row["momentum_score"]) else None,
+            float(row["vol_score"]) if pd.notna(row["vol_score"]) else None,
+            float(row["drawdown_score"]) if pd.notna(row["drawdown_score"]) else None,
+            float(row["market_stress_score"]) if pd.notna(row["market_stress_score"]) else None,
+        ))
+        rows_written += 1
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    print(f'[DB] Written {rows_written} market score rows.')
+
+
+def write_ews(ews_results: pd.DataFrame):
+    """
+    Write final EWS scores and rankings to Postgres.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS ews_scores (
+                ticker VARCHAR(20),
+                run_date DATE,
+                merton_score FLOAT,
+                financial_score FLOAT,
+                market_score FLOAT,
+                ews_score FLOAT,
+                ews_rank INT,
+                PRIMARY KEY (ticker, run_date)
+                );
+
+    """)
+
+    rows_written = 0
+    run_date = pd.Timestamp.today().date()
+
+    for ticker, row in ews_results.iterrows():
+        cur.execute("""
+            INSERT INTO ews_scores (
+                    ticker, run_date, merton_score, financial_score, market_score,
+                    ews_score, ews_rank
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (ticker, run_date) DO UPDATE SET
+                    merton_score = EXCLUDED.merton_score,                                      
+                    financial_score = EXCLUDED.financial_score,
+                    market_score = EXCLUDED.market_score,
+                    ews_score = EXCLUDED.ews_score,
+                    ews_rank = EXCLUDED.ews_rank;
+
+        """, (
+            ticker, run_date,
+            float(row["merton_score"]) if pd.notna(row["merton_score"]) else None,              # Actual values the sql query will send to postgres. 
+            float(row["financial_score"]) if pd.notna(row["financial_score"]) else None,        # Doing pd.notna check since postgres cant handle Nan.
+            float(row["market_score"]) if pd.notna(row["market_score"]) else None,              # So we're sending None
+            float(row["ews_score"]) if pd.notna(row["ews_score"]) else None,
+            int(row["ews_rank"]) if pd.notna(row["ews_rank"]) else None,
+        ))
+        rows_written += 1
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    print(f'[DB] Written {rows_written} EWS rows.')
+
+
+
+def run_db_write(data: dict, merton_results=None, financial_results=None, market_results=None, ews_results=None):
     """ Create tables and write all data to Postgres."""
     print("\n--- Writing to Postgres ---")
     create_tables()
@@ -269,4 +384,14 @@ def run_db_write(data: dict, merton_results=None):
     write_fundamentals(data['fundamentals'])
     if merton_results is not None:
         write_merton(merton_results)
+    if financial_results is not None:
+        write_financials(financial_results)
+    if market_results is not None:
+        write_market(market_results)
+    if ews_results is not None:
+        write_ews(ews_results)
     print("--- DB Write Complete ---")
+
+
+
+        

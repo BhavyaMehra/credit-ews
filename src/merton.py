@@ -70,11 +70,10 @@ def solve_merton(E, sigma_E, D, r=RISK_FREE_RATE, T=1.0):
         )
 
         V_sol, sigma_V_sol = solution[0]
-        residual = solution[1]
         ier = solution[2]
-        msg = solution[3]
-        # Check if solution converged
-        if V_sol <= 0 or sigma_V_sol <= 0:
+        
+        # Check if solution converged, ier == 1 means fsolve found a solution
+        if ier != 1 or V_sol <= 0 or sigma_V_sol <= 0:
             return None
         
         return {

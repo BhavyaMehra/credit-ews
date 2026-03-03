@@ -117,7 +117,11 @@ def run_ingestion():
 
 
 if __name__ == "__main__":
-    from db import run_db_write
+    from db import create_tables, write_prices, write_fundamentals
     data = run_ingestion()
-    run_db_write(data)
+    create_tables()
+    write_prices(data['prices'], data['volatility'])
+    write_fundamentals(data['fundamentals'])
+
+    
     
