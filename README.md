@@ -38,9 +38,7 @@ Three independent risk modules are combined:
 
 Final score:
 
-EWS = 0.30 × Merton  
-    + 0.40 × Financial  
-    + 0.30 × Market
+EWS = 0.30 × Merton  + 0.40 × Financial  + 0.30 × Market
 
 
 Higher scores indicate **greater credit risk**.
@@ -59,7 +57,9 @@ Risk signals are monitored through a **Grafana dashboard** backed by PostgreSQL.
 
 Dashboard screenshots shown below.
 ![alt text](distance_to_default.png)
+
 ![alt text](risk_driver_decomposition.png) 
+
 ![alt text](early_warning_signal_monitor.png)
 
 ---
