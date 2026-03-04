@@ -21,7 +21,7 @@ Three independent risk modules are combined:
 
 **Structural Risk – Merton Model**
 - Estimates firm asset value and volatility from equity prices
-- Computes **Distance to Default (DD)**
+- Estimates `Distance to Default (DD)` and implied `Probability of Default (PD)` using the Merton structural credit model.
 
 **Financial Risk**
 - Interest Coverage
@@ -55,12 +55,11 @@ Risk signals are monitored through a **Grafana dashboard** backed by PostgreSQL.
 - Risk driver decomposition (structural / financial / market)
 - Early Warning Score ranking
 
-Dashboard screenshots shown below.
-![alt text](distance_to_default.png)
+![Distance to Default](distance_to_default.png)
 
-![alt text](risk_driver_decomposition.png) 
+![Risk Driver Decomposition](risk_driver_decomposition.png) 
 
-![alt text](early_warning_signal_monitor.png)
+![Early Warning Signal Monitor](early_warning_signal_monitor.png)
 
 ---
 
