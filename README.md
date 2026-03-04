@@ -36,7 +36,7 @@ Three independent risk modules are combined:
 - 6-month drawdown
 - Relative return vs Nifty 50
 
-Final score:
+**Final score:**
 
 EWS = 0.30 × Merton  + 0.40 × Financial  + 0.30 × Market
 
