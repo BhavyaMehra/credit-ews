@@ -65,7 +65,7 @@ The composite now averages four signals equally - momentum, vol regime, 6-month 
 
 **Chronic distress blind spot:** The market module is designed to catch acute and recent stress. IDEA scores near-zero on market signals despite fundamental insolvency risk because the price has already fully repriced over several years.
 
-**Percentile rank trade-off:** Merton score reflects relative rank within the universe rather than absolute probability of default. 
+**Percentile rank trade-off:** Merton score reflects relative rank within the universe rather than absolute probability of default. Universe composition affects all scores, meaning adding or removing tickers shifts rankings across the board even when underlying financials are unchanged.
 
 **Financial ratio step-function scoring:** Scores are bucketed into discrete values (0, 0.4, 0.5, 0.6, 1.0) which limits granularity. Many companies share identical scores. A continuous scoring approach would improve discrimination between similar firms.
 
