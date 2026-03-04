@@ -261,9 +261,7 @@ def write_financials(financial_results: pd.DataFrame):
     print(f"[DB] Written {rows_written} financial score rows")
 
 def write_market(market_results: pd.DataFrame):
-    """
-    Write market signal scores to Postgres.
-    """
+    """Write market signal scores to Postgres."""
 
     conn = get_connection()
     cur = conn.cursor()
@@ -274,50 +272,54 @@ def write_market(market_results: pd.DataFrame):
                 run_date DATE,
                 momentum_3m FLOAT,
                 vol_regime FLOAT,
-                max_drawdown FLOAT,
+                drawdown_6m FLOAT,
+                relative_return_6m FLOAT,
                 momentum_score FLOAT,
                 vol_score FLOAT,
                 drawdown_score FLOAT,
+                relative_score FLOAT,
                 market_stress_score FLOAT,
                 PRIMARY KEY (ticker, run_date)
             );
-
 """)
-    
+
     rows_written = 0
     run_date = pd.Timestamp.today().date()
 
     for ticker, row in market_results.iterrows():
         cur.execute("""
             INSERT INTO market_scores (
-                    ticker, run_date, momentum_3m, vol_regime, max_drawdown, momentum_score, vol_score, drawdown_score, market_stress_score
+                    ticker, run_date, momentum_3m, vol_regime, drawdown_6m, relative_return_6m,
+                    momentum_score, vol_score, drawdown_score, relative_score, market_stress_score
                     )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (ticker, run_date) DO UPDATE SET
                     momentum_3m = EXCLUDED.momentum_3m,
                     vol_regime = EXCLUDED.vol_regime,
-                    max_drawdown = EXCLUDED.max_drawdown,
+                    drawdown_6m = EXCLUDED.drawdown_6m,
+                    relative_return_6m = EXCLUDED.relative_return_6m,
                     momentum_score = EXCLUDED.momentum_score,
                     vol_score = EXCLUDED.vol_score,
                     drawdown_score = EXCLUDED.drawdown_score,
+                    relative_score = EXCLUDED.relative_score,
                     market_stress_score = EXCLUDED.market_stress_score;
-
         """, (
             ticker, run_date,
             float(row['momentum_3m']) if pd.notna(row['momentum_3m']) else None,
-            float(row["vol_regime"]) if pd.notna(row["vol_regime"]) else None,
-            float(row["max_drawdown"]) if pd.notna(row["max_drawdown"]) else None,
-            float(row["momentum_score"]) if pd.notna(row["momentum_score"]) else None,
-            float(row["vol_score"]) if pd.notna(row["vol_score"]) else None,
-            float(row["drawdown_score"]) if pd.notna(row["drawdown_score"]) else None,
-            float(row["market_stress_score"]) if pd.notna(row["market_stress_score"]) else None,
+            float(row['vol_regime']) if pd.notna(row['vol_regime']) else None,
+            float(row['drawdown_6m']) if pd.notna(row['drawdown_6m']) else None,
+            float(row['relative_return_6m']) if pd.notna(row['relative_return_6m']) else None,
+            float(row['momentum_score']) if pd.notna(row['momentum_score']) else None,
+            float(row['vol_score']) if pd.notna(row['vol_score']) else None,
+            float(row['drawdown_score']) if pd.notna(row['drawdown_score']) else None,
+            float(row['relative_score']) if pd.notna(row['relative_score']) else None,
+            float(row['market_stress_score']) if pd.notna(row['market_stress_score']) else None,
         ))
         rows_written += 1
-    
+
     conn.commit()
     cur.close()
     conn.close()
-
     print(f'[DB] Written {rows_written} market score rows.')
 
 

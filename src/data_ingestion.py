@@ -22,7 +22,7 @@ START_DATE = END_DATE - timedelta(days=365 * LOOKBACK)
 def fetch_prices() -> pd.DataFrame:
     """Fetch adjusted close prices for all tickers."""
     df = yf.download(
-        TICKERS,
+        TICKERS + ['^NSEI'],
         start=START_DATE,
         end=END_DATE,
         auto_adjust=True,

@@ -14,88 +14,109 @@ def compute_market_signals(prices: pd.DataFrame, volatility: pd.DataFrame, funda
     Compute three raw market stress signals for each ticker:
     - momentum_3m: 3-month price return (negative = falling)
     - vol_regime: ratio of 30d to 252d volatility (>1 = spiking vol)
-    - max_drawdown: peak-to-trough decline, scaled by beta
+    - drawdown_6m: how far current price is from its 6-month peak (current stress, not historical worst case)
+    - relative_return_6m: stock return vs Nifty 50 over 6 months (firm-specific underperformance)
     """
+
+    # Extract Nifty benchmark and remove from ticker loop
+    nifty = prices["^NSEI"].dropna() if "^NSEI" in prices.columns else None
+    tickers = [t for t in prices.columns if t != "^NSEI"]
 
     results = {}
 
-    for ticker in prices.columns: # prices df has each column as a ticker showing prices in rows
+    for ticker in tickers:
         s = prices[ticker].dropna()
 
-        # Need atleast 63 trading days(~3 months) to compute signals
         if len(s) < 63:
-            results[ticker] = {'momentum_3m': np.nan, 'vol_regime': np.nan, 'max_drawdown': np.nan}
+            results[ticker] = {
+                'momentum_3m': np.nan,
+                'vol_regime': np.nan,
+                'drawdown_6m': np.nan,
+                'relative_return_6m': np.nan
+            }
             continue
 
-        # If 3 month price momentum is negative == Stock falling = stress signal
+        # 3-month momentum
         momentum = (s.iloc[-1] / s.iloc[-63]) - 1
 
-        # Volatility regime = recent 30d vol / 252d vol
-        # >1 means volatility is spiking relative to its norm == stress
+        # Vol regime: 30d vs 252d vol
         log_ret = np.log(s / s.shift(1)).dropna()
         vol_30 = log_ret.iloc[-30:].std() * np.sqrt(TRADING_DAYS)
-        vol_252 = volatility[ticker].dropna().iloc[-1] if ticker in volatility.columns else vol_30 # else is for safe fallback
+        vol_252 = volatility[ticker].dropna().iloc[-1] if ticker in volatility.columns else vol_30
         vol_regime = vol_30 / vol_252
 
+        # 6-month drawdown from recent peak — captures current equity stress
+        # No beta adjustment: Merton already incorporates equity volatility
+        s_6m = s.iloc[-126:]
+        peak_6m = s_6m.expanding().max()
+        drawdown_6m = ((s_6m - peak_6m) / peak_6m).iloc[-1]  # current distance from 6m peak
 
-        # Max drawdown scaled by beta
-        # High beta stock falling hard == amplified stress signal
-        beta = fundamentals.loc[ticker, 'beta'] if ticker in fundamentals.index else 1.0    # if ticker exists in fundamentals df
-        beta = beta if pd.notna(beta) else 1.0                                              # if beta exists in fundamentals and if its nan then make it 1.0 default.
-        rollmax = s.expanding().max()                                                       # roll_max gives series upto that row with rolling max number
-        drawdown = ((s - rollmax) / rollmax).min()                                          # How far current price is from rolling max. We do min to get the worst case/drawdown
-        adj_drawdown = drawdown * beta
+        # Relative return vs Nifty over 6 months — isolates firm-specific stress
+        if nifty is not None and len(nifty) >= 126:
+            stock_ret_6m = (s.iloc[-1] / s.iloc[-126]) - 1
+            nifty_ret_6m = (nifty.iloc[-1] / nifty.iloc[-126]) - 1
+            relative_return_6m = stock_ret_6m - nifty_ret_6m
+        else:
+            relative_return_6m = np.nan
 
         results[ticker] = {
             'momentum_3m': momentum,
             'vol_regime': vol_regime,
-            'max_drawdown': adj_drawdown
+            'drawdown_6m': drawdown_6m,
+            'relative_return_6m': relative_return_6m
         }
-    
+
     return pd.DataFrame.from_dict(results, orient='index')
+
 
 
 def score_market(signals: pd.DataFrame) -> pd.DataFrame:
     """
     Convert raw market signals into stress scores between 0 and 1.
     1 = highest stress, 0 = safest.
-    Thresholds are based on empirical rules of thumb for Indian equities.
     """
-    
+
     scores = pd.DataFrame(index=signals.index)
 
-    # Momentum : Deeper negative return = more stress
+    # Momentum — negative return = stress
     scores['momentum_score'] = np.where(
         signals['momentum_3m'].isna(), 0.5,
-        np.where(signals['momentum_3m'] < -0.20, 1.0, # fell > 20%
-        np.where(signals['momentum_3m'] < -0.05, 0.5, # fell 5-20%
-                 0.0))                                # flat or up
+        np.where(signals['momentum_3m'] < -0.15, 1.0,  # fell > 15%
+        np.where(signals['momentum_3m'] < -0.05, 0.5,  # fell 5-15%
+                 0.0))
     )
 
-
-    # Volatility regiem: spiking vol relative to norm = stress
+    # Vol regime — spiking vol relative to norm = stress
     scores['vol_score'] = np.where(
         signals['vol_regime'].isna(), 0.5,
-        np.where(signals['vol_regime'] > 1.5, 1.0,       # volatility 50% above norm
-        np.where(signals['vol_regime'] > 1.1, 0.5,      # volatility mildly elevated
+        np.where(signals['vol_regime'] > 1.5, 1.0,   # vol 50% above norm
+        np.where(signals['vol_regime'] > 1.1, 0.5,   # vol mildly elevated
                  0.0))
     )
 
-
-    # Drawdown: deeper beta adjusted drawdown = more stress
+    # 6-month drawdown from recent peak — how stressed is the stock right now
     scores['drawdown_score'] = np.where(
-        signals['max_drawdown'].isna(), 0.5,
-        np.where(signals['max_drawdown'] < -0.40, 1.0,  # > 40% drawdown
-        np.where(signals['max_drawdown'] < -0.20, 0.5,  # 20-40% drawdown
+        signals['drawdown_6m'].isna(), 0.5,
+        np.where(signals['drawdown_6m'] < -0.20, 1.0,  # > 20% below 6m peak
+        np.where(signals['drawdown_6m'] < -0.08, 0.5,  # 8-20% below peak
                  0.0))
     )
 
+    # Relative return vs Nifty — firm-specific underperformance = stress
+    scores['relative_score'] = np.where(
+        signals['relative_return_6m'].isna(), 0.5,
+        np.where(signals['relative_return_6m'] < -0.15, 1.0,  # underperformed Nifty by > 15%
+        np.where(signals['relative_return_6m'] < -0.05, 0.5,  # mild underperformance
+                 0.0))
+    )
 
-    # Composite: equal weights across three signals
-    scores['market_stress_score'] = scores[['momentum_score', 'vol_score', 'drawdown_score']].mean(axis=1)
+    # Composite: equal weights across four signals
+    scores['market_stress_score'] = scores[[
+        'momentum_score', 'vol_score', 'drawdown_score', 'relative_score'
+    ]].mean(axis=1)
 
     print(f'[Market] Stress scored for {scores.shape[0]} companies.')
-    
+
     return scores
 
 

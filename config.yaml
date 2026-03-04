@@ -1,19 +1,15 @@
 universe:
-  # Banks
+  # Banks (stress-focused only)
   YESBANK.NS: "Yes Bank"
-  RBLBANK.NS: "RBL Bank"
-  IDFCFIRSTB.NS: "IDFC First Bank"
-  SBIN.NS: "SBI"
-  HDFCBANK.NS: "HDFC Bank"
+  PNB.NS: "Punjab National Bank"
   # Telecom
   IDEA.NS: "Vodafone Idea"
+  RCOM.NS: "Reliance Communications"
   # Media
   ZEEL.NS: "Zee Entertainment"
   # NBFCs
-  MANAPPURAM.NS: "Manappuram Finance"
-  MUTHOOTFIN.NS: "Muthoot Finance"
-  CHOLAFIN.NS: "Chola Finance"
   BAJFINANCE.NS: "Bajaj Finance"
+  IIFL.NS: "IIFL Finance"
   # Aviation
   INDIGO.NS: "IndiGo"
   # Energy
@@ -26,15 +22,15 @@ universe:
   VEDL.NS: "Vedanta"
   JINDALSTEL.NS: "JSPL"
   TATASTEEL.NS: "Tata Steel"
-  SAIL.NS: "SAIL"
+  SAIL.NS: "Metals"
   HINDCOPPER.NS: "Hindustan Copper"
   # Electricals
   POLYCAB.NS: "Polycab"
   # Entertainment
   PVRINOX.NS: "PVR Inox"
   # Auto
-  LTF.NS: "LT Finance"
   MARUTI.NS: "Maruti"
+  RAYMOND.NS: "Raymond"
   # Pharma
   SUNPHARMA.NS: "Sun Pharma"
   DRREDDY.NS: "Dr Reddy"
@@ -48,21 +44,19 @@ universe:
   TATACHEM.NS: "Tata Chemicals"
   # Infrastructure
   GMRAIRPORT.NS: "GMR Airports"
+  JPASSOCIAT.NS: "Jaiprakash Associates"
+  GTLINFRA.NS: "GTL Infrastructure"
   # Realty
   DLF.NS: "DLF"
 
 sectors:
   YESBANK.NS: "Bank"
-  RBLBANK.NS: "Bank"
-  IDFCFIRSTB.NS: "Bank"
-  SBIN.NS: "Bank"
-  HDFCBANK.NS: "Bank"
+  PNB.NS: "Bank"
   IDEA.NS: "Telecom"
+  RCOM.NS: "Telecom"
   ZEEL.NS: "Media"
-  MANAPPURAM.NS: "NBFC"
-  MUTHOOTFIN.NS: "NBFC"
-  CHOLAFIN.NS: "NBFC"
   BAJFINANCE.NS: "NBFC"
+  IIFL.NS: "NBFC"
   INDIGO.NS: "Aviation"
   SUZLON.NS: "Energy"
   JSWENERGY.NS: "Energy"
@@ -75,8 +69,8 @@ sectors:
   HINDCOPPER.NS: "Metals"
   POLYCAB.NS: "Electricals"
   PVRINOX.NS: "Entertainment"
-  LTF.NS: "NBFC"
   MARUTI.NS: "Auto"
+  RAYMOND.NS: "Textiles"
   SUNPHARMA.NS: "Pharma"
   DRREDDY.NS: "Pharma"
   CIPLA.NS: "Pharma"
@@ -86,16 +80,17 @@ sectors:
   INFY.NS: "IT"
   TATACHEM.NS: "Chemicals"
   GMRAIRPORT.NS: "Infrastructure"
+  JPASSOCIAT.NS: "Infrastructure"
+  GTLINFRA.NS: "Infrastructure"
   DLF.NS: "Realty"
 
 stress_context:
   YESBANK.NS: "RBI bailout, near collapse 2020"
-  RBLBANK.NS: "CEO sudden exit, RBI intervention 2021"
-  IDFCFIRSTB.NS: "Weak asset quality, transition stress"
+  PNB.NS: "Nirav Modi fraud 2018, high NPA history"
   IDEA.NS: "Existential debt crisis, AGR dues"
+  RCOM.NS: "Bankruptcy proceedings, debt default"
   ZEEL.NS: "Promoter pledge, Sony merger collapse"
-  MANAPPURAM.NS: "RBI audit, gold loan regulatory risk"
-  SPICEJET.NS: "Near bankruptcy, DGCA grounding"
+  IIFL.NS: "RBI gold loan ban March 2024, stock -30%"
   SUZLON.NS: "Massive debt restructuring history"
   ADANIENT.NS: "Hindenburg short attack 2023"
   ADANIPORTS.NS: "Hindenburg short attack 2023"
@@ -103,11 +98,13 @@ stress_context:
   JINDALSTEL.NS: "Overleveraged, debt restructuring"
   POLYCAB.NS: "IT raid, accounting allegations 2023"
   PVRINOX.NS: "COVID collapse, merger stress"
-  TATAMOTORS.NS: "JLR debt, turnaround story"
+  RAYMOND.NS: "High leverage, demerger complexity"
   SUNPHARMA.NS: "SEBI fraud case, promoter issues"
   DRREDDY.NS: "USFDA import alerts"
   TECHM.NS: "Margin stress, CEO change"
   GMRAIRPORT.NS: "High debt, infra stress"
+  JPASSOCIAT.NS: "Debt restructuring, asset sales"
+  GTLINFRA.NS: "Long-term financial distress"
   DLF.NS: "Debt overhang, real estate downturn"
 
 model:
@@ -115,7 +112,10 @@ model:
   risk_free_rate: 0.068
   trading_days: 252
 
+# Reduced Merton weight after observing flat PD on large-cap universe.
+# Merton signal sharpens with genuinely distressed companies added.
+# Financials and market carry more weight as primary discriminators.
 scoring_weights:
-  merton: 0.40
-  financials: 0.35
-  market: 0.25
+  merton: 0.30
+  financials: 0.40
+  market: 0.30

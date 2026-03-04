@@ -18,8 +18,10 @@ def compute_ews_score(merton_results: pd.DataFrame, financial_results: pd.DataFr
 
     scores = pd.DataFrame(index=merton_results.index)
 
-    # Merton PD is already 0-1 (its a probability)
-    scores['merton_score'] = merton_results['probability_of_default']
+    # AFTER RUNNING THE MODEL WITH RAW PD we observed it is near-zero for most companies, killing the signal.
+    # Percentile rank spreads it across 0-1 based on relative risk within the universe.
+    # A company with the highest PD gets 1.0, lowest gets 0.0 — regardless of absolute values.
+    scores['merton_score'] = merton_results['probability_of_default'].rank(pct=True)
 
     # Pull composite scores from other modules
     scores['financial_score'] = financial_results['financial_stress_score']
