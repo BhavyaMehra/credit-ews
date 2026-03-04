@@ -2,7 +2,7 @@
 
 A credit risk monitoring system that combines structural, financial, and market signals to identify firms showing early signs of financial distress.
 
-The system computes a composite **Early Warning Score (EWS)** for a universe of NSE-listed companies and visualizes risk signals using a **PostgreSQL + Grafana dashboard**.
+The system computes a composite Early Warning Score (EWS) for a universe of NSE-listed companies, refreshed weekly via an automated pipeline, and visualizes risk signals through a live **PostgreSQL** + **Grafana** dashboard.
 
 The model currently monitors **33 NSE-listed companies** across multiple sectors.
 
