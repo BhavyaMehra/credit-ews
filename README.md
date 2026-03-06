@@ -55,11 +55,11 @@ Risk signals are monitored through a **Grafana dashboard** backed by PostgreSQL.
 - Risk driver decomposition (structural / financial / market)
 - Early Warning Score ranking
 
-![Distance to Default](distance_to_default.png)
+![Distance to Default](grafana_dashboard_ss/distance_to_default.png)
 
-![Risk Driver Decomposition](risk_driver_decomposition.png) 
+![Risk Driver Decomposition](grafana_dashboard_ss/risk_driver_decomposition.png) 
 
-![Early Warning Signal Monitor](early_warning_signal_monitor.png)
+![Early Warning Signal Monitor](grafana_dashboard_ss/early_warning_signal_monitor.png)
 
 ---
 
